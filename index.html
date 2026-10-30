@@ -23,12 +23,12 @@ a{color:var(--gold)}
 .mk{font-family:"Marcellus",Georgia,serif;font-weight:400}
 nav.top{position:fixed;z-index:30;left:50%;bottom:12px;transform:translateX(-50%);display:flex;gap:1.1rem;background:var(--navy2);border:1px solid var(--gold);padding:.55rem 1.2rem;white-space:nowrap}
 nav.top a{color:var(--gold);text-decoration:none;font-family:"Marcellus",serif;font-size:1rem}
-@media(min-width:900px){nav.top{bottom:auto;top:46px}}
-.hero{position:relative;height:300vh}
+@media(min-width:900px){nav.top{bottom:auto;top:46px;left:auto;right:22px;transform:none}}
+.hero{position:relative;height:360vh}
 .stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:radial-gradient(90% 70% at 50% 40%,#1b2b5a,var(--navy) 75%)}
 .book{position:absolute;left:0;top:0;width:var(--bw);aspect-ratio:1600/2560;will-change:transform}
 .book>img{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
-#scene{left:auto;top:auto}
+.book>#island{left:16.875%;top:40.5%;width:68.25%;height:auto;will-change:transform}
 .copy{position:absolute;z-index:4;left:20px;right:20px;bottom:76px;opacity:0;will-change:opacity;text-align:center}
 .copy h1{font-family:"Marcellus",serif;font-weight:400;color:var(--gold);font-size:clamp(1.6rem,7vw,2.8rem);line-height:1.1}
 .copy p{color:var(--cream);margin:.4rem 0 1rem}
@@ -60,8 +60,7 @@ footer{text-align:center;color:var(--soft);font-size:.9rem;padding:3rem 16px 6re
   <div class="stage" id="stage">
     <div class="book" id="book" role="img" aria-label="The Old Crones Club cover: four witches in silhouette in a teal forest above an upside down gold castle, on midnight blue between bare teal branches">
       <img id="plate" src="img/plate.jpg" alt="" width="640" height="1024">
-      <img id="scene" src="img/scene.webp" alt="" style="display:none">
-      <img id="full" src="img/crones.jpg" alt="" width="640" height="1024" style="opacity:0">
+      <img id="island" src="img/island.webp" alt="" width="728" height="803">
     </div>
     <div class="copy" id="copy">
       <h1>Too old to burn. Too wicked to die.</h1>
@@ -111,16 +110,18 @@ footer{text-align:center;color:var(--soft);font-size:.9rem;padding:3rem 16px 6re
 </main>
 <footer>A mockup made by Sparsh Saini for Jennifer Taylor-Gray. Not affiliated, not live.</footer>
 <script>
-(()=>{const hero=document.querySelector('.hero'),stage=document.getElementById('stage'),book=document.getElementById('book'),copy=document.getElementById('copy'),plate=document.getElementById('plate'),full=document.getElementById('full');
-// simple first pass: the cover settles into the frame, then the copy comes up
-full.style.opacity=1;plate.style.display='none';
+(()=>{const hero=document.querySelector('.hero'),stage=document.getElementById('stage'),book=document.getElementById('book'),copy=document.getElementById('copy'),isl=document.getElementById('island');
 if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-let W,H,bw,bh,rx,ry,ht,tick=false;const cl=v=>Math.max(0,Math.min(1,v)),eo=t=>1-Math.pow(1-t,3);
+let W,H,bw,bh,rx,ry,ht,tick=false;const cl=v=>Math.max(0,Math.min(1,v)),eio=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+// the fairytale the right way up: castle on top, the witches hanging underneath. Scroll turns the papercut over until the crones stand on top, as on the cover.
+const turn=x=>{const e=eio(x);return 180*(1-e)+(-7*Math.sin(Math.PI*cl((x-.7)/.3))*(x>.7?1:0))};
 function measure(){W=innerWidth;H=stage.clientHeight;const d=W>=900;bw=d?Math.min(H*.86/1.6,W*.34):Math.min(W*.74,H*.62/1.6);bh=bw*1.6;
  book.style.setProperty('--bw',bw+'px');rx=d?W*.3-bw/2:W/2-bw/2;ry=d?H/2-bh/2:H*.05;ht=hero.offsetHeight-H;draw()}
-function draw(){tick=false;const p=cl((scrollY-hero.offsetTop)/ht);const k=eo(cl(p/.6));
- book.style.transform=`translate(${rx}px,${ry}px) scale(${1.25-.25*k})`;
- const c=cl((p-.62)/.25);copy.style.opacity=c;stage.style.setProperty('--sc',c);copy.style.transform=(W>=900?'translateY(-50%) ':'')+`translateY(${(1-c)*14}px)`}
+function draw(){tick=false;const p=cl((scrollY-hero.offsetTop)/ht);
+ const x=cl((p-.08)/.62),z=eio(cl(p/.7));
+ isl.style.transform=`rotate(${turn(x).toFixed(2)}deg) scale(${1+.08*Math.sin(Math.PI*x)})`;
+ book.style.transform=`translate(${rx}px,${ry}px) translateY(${bh*.12*(1-z)}px) scale(${1.45-.45*z})`;
+ const c=cl((p-.76)/.18);copy.style.opacity=c;stage.style.setProperty('--sc',c);copy.style.transform=(W>=900?'translateY(-50%) ':'')+`translateY(${(1-c)*14}px)`}
 addEventListener('scroll',()=>{if(!tick){tick=true;requestAnimationFrame(draw)}},{passive:true});addEventListener('resize',measure);measure()})();
 </script>
 </body>
